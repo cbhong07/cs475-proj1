@@ -9,15 +9,15 @@
  */
 void printqueue(struct queue *q)
 {
-	struct qentry current = &q.head;
+	struct qentry *current = q->head;
 	printf("[");
-	while (current.next != NULL) {
-		if (current.pid == &q.tail.pid) {
-			printf("(%d)", current.pid);
+	while (current->next != NULL) {
+		if (current == q->tail) {
+			printf("(%d)", current->pid);
 		}
 		else {
-			printf("(%d), ", current.pid);
-			current = current.next;
+			printf("(%d), ", current->pid);
+			current = current->next;
 		}
 	}
 	printf("]");
@@ -32,7 +32,7 @@ void printqueue(struct queue *q)
  */
 bool8 isempty(struct queue *q)
 {
-	if(q.size == EMPTY) {
+	if(q->size == EMPTY) {
 		return TRUE;
 	}
 	else {
@@ -48,7 +48,7 @@ bool8 isempty(struct queue *q)
  */
 bool8 nonempty(struct queue *q)
 {
-	if(q.head != NULL) {
+	if(q->head != NULL) {
 		return FALSE;
 	}
 	else {
@@ -64,7 +64,7 @@ bool8 nonempty(struct queue *q)
  */
 bool8 isfull(struct queue *q)
 {
-	if(q.size >= NPROC) {
+	if(q->size >= NPROC) {
 		return TRUE;
 	}
 	else {
@@ -88,8 +88,8 @@ pid32 enqueue(pid32 pid, struct queue *q)
 	}
 	else {
 		//malloc here
-		struct qentry new = {.pid32 = pid, .next = NULL, .prev = q.tail};
-		q.tail = new;
+		struct qentry new = {.pid = pid, .next = NULL, .prev = q->tail};
+		q->tail = new;
 		return pid;
 	}
 	// TODO - allocate space on heap for a new QEntry
