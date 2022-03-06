@@ -9,8 +9,19 @@
  */
 void printqueue(struct queue *q)
 {
+	struct qentry current = &q.head;
+	printf("[");
+	while (current.next != NULL) {
+		if (current.pid == &q.tail.pid) {
+			printf("(%d)", current.pid);
+		}
+		else {
+			printf("(%d), ", current.pid);
+			current = current.next;
+		}
+	}
+	printf("]");
 	// TODO - print all contents from head to tail
-
 	// TODO - format should be [(pid), (pid), ...]
 }
 
@@ -21,6 +32,12 @@ void printqueue(struct queue *q)
  */
 bool8 isempty(struct queue *q)
 {
+	if(q.size == EMPTY) {
+		return TRUE;
+	}
+	else {
+		return FALSE;
+	}
 	// TODO
 }
 
@@ -31,6 +48,12 @@ bool8 isempty(struct queue *q)
  */
 bool8 nonempty(struct queue *q)
 {
+	if(q.head != NULL) {
+		return FALSE;
+	}
+	else {
+		return TRUE;
+	}
 	// TODO - don't just check q's size because q could be NULL
 }
 
@@ -41,6 +64,12 @@ bool8 nonempty(struct queue *q)
  */
 bool8 isfull(struct queue *q)
 {
+	if(q.size >= NPROC) {
+		return TRUE;
+	}
+	else {
+		return FALSE;
+	}
 	// TODO - check if there are at least NPROC processes in the queue
 }
 
@@ -54,7 +83,15 @@ bool8 isfull(struct queue *q)
 pid32 enqueue(pid32 pid, struct queue *q)
 {
 	// TODO - check if queue is full and if pid is illegal, and return SYSERR if either is true
-
+	if(isfull(q) == TRUE || isbadpid(pid)) {
+		return SYSERR;
+	}
+	else {
+		//malloc here
+		struct qentry new = {.pid32 = pid, .next = NULL, .prev = q.tail};
+		q.tail = new;
+		return pid;
+	}
 	// TODO - allocate space on heap for a new QEntry
 
 	// TODO - initialize the new QEntry
