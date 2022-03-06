@@ -128,11 +128,24 @@ pid32 dequeue(struct queue *q)
 struct qentry *getbypid(pid32 pid, struct queue *q)
 {
 	// TODO - return NULL if queue is empty or if an illegal pid is given
-
+	if(isEmpty(q) || isbadpid(pid))
+		return NULL;
 	// TODO - find the qentry with the given pid
-
+	bool8 found = FALSE;
+	struct qentry *temp = q->head;
+	while(!found)
+	{
+		if(temp->pid == pid)
+		{
+			found = TRUE;
+			break;
+		}
+		else temp = temp->next;
+	}
 	// TODO - return a pointer to it
+	return temp;
 }
+
 
 /**
  * Remove a process from the front of a queue (pid assumed valid with no check)
