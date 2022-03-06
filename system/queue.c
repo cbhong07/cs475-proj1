@@ -9,15 +9,15 @@
  */
 void printqueue(struct queue *q)
 {
-	struct qentry current = &q.head;
+	struct qentry *current = q->head;
 	printf("[");
-	while (current.next != NULL) {
-		if (current.pid == &q.tail.pid) {
-			printf("(%d)", current.pid);
+	while (current->next != NULL) {
+		if (current == q->tail) {
+			printf("(%d)", current->pid);
 		}
 		else {
-			printf("(%d), ", current.pid);
-			current = current.next;
+			printf("(%d), ", current->pid);
+			current = current->next;
 		}
 	}
 	printf("]");
@@ -32,7 +32,7 @@ void printqueue(struct queue *q)
  */
 bool8 isempty(struct queue *q)
 {
-	if(q.size == EMPTY) {
+	if(q->size == EMPTY) {
 		return TRUE;
 	}
 	else {
@@ -48,7 +48,7 @@ bool8 isempty(struct queue *q)
  */
 bool8 nonempty(struct queue *q)
 {
-	if(q.head != NULL) {
+	if(q->head != NULL) {
 		return FALSE;
 	}
 	else {
@@ -64,7 +64,7 @@ bool8 nonempty(struct queue *q)
  */
 bool8 isfull(struct queue *q)
 {
-	if(q.size >= NPROC) {
+	if(q->size >= NPROC) {
 		return TRUE;
 	}
 	else {
@@ -87,9 +87,9 @@ pid32 enqueue(pid32 pid, struct queue *q)
 		return SYSERR;
 	}
 	else {
-		//malloc here
-		struct qentry new = {.pid32 = pid, .next = NULL, .prev = q.tail};
-		q.tail = new;
+		struct qentry *new = (struct qentry*) malloc(uint32 nbytes);
+		new = {.pid = pid, .next = NULL, .prev = q->tail};
+		q->tail = new;
 		return pid;
 	}
 	// TODO - allocate space on heap for a new QEntry
@@ -108,6 +108,15 @@ pid32 enqueue(pid32 pid, struct queue *q)
  */
 pid32 dequeue(struct queue *q)
 {
+	if(isempty(q) == EMPTY) {
+		return EMPTY;
+	}
+	else {
+		struct qentry head = q->head;
+		q->head = head->next;
+		//free memory
+		return head.pid;
+	}
 	// TODO - return EMPTY if queue is empty
 
 	// TODO - get the head entry of the queue
@@ -128,11 +137,24 @@ pid32 dequeue(struct queue *q)
 struct qentry *getbypid(pid32 pid, struct queue *q)
 {
 	// TODO - return NULL if queue is empty or if an illegal pid is given
-
+	if(isEmpty(q) || isbadpid(pid))
+		return NULL;
 	// TODO - find the qentry with the given pid
-
+	bool8 found = FALSE;
+	struct qentry *temp = q->head;
+	while(!found)
+	{
+		if(temp->pid == pid)
+		{
+			found = TRUE;
+			break;
+		}
+		else temp = temp->next;
+	}
 	// TODO - return a pointer to it
+	return temp;
 }
+
 
 /**
  * Remove a process from the front of a queue (pid assumed valid with no check)
