@@ -155,8 +155,14 @@ struct qentry *getbypid(pid32 pid, struct queue *q)
 pid32 getfirst(struct queue *q)
 {
 	// TODO - return EMPTY if queue is empty
-
+	if(isEmpty(q))
+		return EMPTY;
 	// TODO - remove process from head of queue and return its pid
+	pid32 removed = q->head->pid;
+	struct qentry *next = q->head->next;
+	free(q->head);
+	q->head = next;
+	return removed;
 }
 
 /**
@@ -167,8 +173,14 @@ pid32 getfirst(struct queue *q)
 pid32 getlast(struct queue *q)
 {
 	// TODO - return EMPTY if queue is empty
-
+	if(isEmpty(q))
+		return EMPTY;
 	// TODO - remove process from tail of queue and return its pid
+	pid32 removed = q->tail->pid;
+	struct qentry *last = q->tail->prev;
+	free(q->tail);
+	q->tail = last;
+	return removed;
 }
 
 /**
@@ -180,10 +192,18 @@ pid32 getlast(struct queue *q)
 pid32 remove(pid32 pid, struct queue *q)
 {
 	// TODO - return EMPTY if queue is empty
-
+	if(isEmpty(q))
+		return EMPTY;
 	// TODO - return SYSERR if pid is illegal
-
+	if(isbadpid(pid))
+		return SYSERR;
 	// TODO - remove process identified by pid parameter from the queue and return its pid
-
-	// TODO - if pid does not exist in the queue, return SYSERR
+	struct qentry *removed = getbypid(pid, q);
+	if(removed != NULL)
+	{
+		
+	}
+	else // TODO - if pid does not exist in the queue, return SYSERR
+		return SYSERR;
+	
 }
