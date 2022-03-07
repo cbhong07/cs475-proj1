@@ -12,6 +12,7 @@ struct queue *readyqueue;	/** ready queue */
  */
 status	ready(pid32 pid, bool8 resch)
 {
+	kprintf("Ready initiated \n");
 	register struct procent *prptr;
 
 	if (isbadpid(pid))
@@ -27,6 +28,5 @@ status	ready(pid32 pid, bool8 resch)
 	
 	if (resch == RESCHED_YES)
 		resched();
-
 	return OK;
 }

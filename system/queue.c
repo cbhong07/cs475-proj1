@@ -112,10 +112,12 @@ pid32 dequeue(struct queue *q)
 		return EMPTY;
 	}
 	else {
-		struct qentry *head = q->head;
-		q->head = head->next;
+		struct qentry *head = q->head->next;
 		kprintf("About to free head in dequeue\n");
-		free(head, sizeof(head));
+		free(q->head, sizeof(q->head));
+		kprintf("Freeing dequeue head successful\n");
+		q->head = head;
+		kprintf("Dequeue successfully reassigned head\n");
 		return head->pid;
 	}
 }
