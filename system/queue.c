@@ -87,8 +87,8 @@ pid32 enqueue(pid32 pid, struct queue *q)
 		return SYSERR;
 	}
 	else {
-		struct qentry *new = (struct qentry*) malloc(uint32 nbytes);
-		new = {.pid = pid, .next = NULL, .prev = q->tail};
+		struct qentry *new = (struct qentry*) malloc(sizeof(struct qentry)); //POSSIBLE BREAKPOINT
+		*new = (struct qentry) {.pid = pid, .next = NULL, .prev = q->tail}; //ALSO POSSIBLY BROKEN???
 		q->tail = new;
 		return pid;
 	}
@@ -112,10 +112,10 @@ pid32 dequeue(struct queue *q)
 		return EMPTY;
 	}
 	else {
-		struct qentry head = q->head;
+		struct qentry *head = q->head;
 		q->head = head->next;
 		//free memory
-		return head.pid;
+		return head->pid;
 	}
 	// TODO - return EMPTY if queue is empty
 
