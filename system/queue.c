@@ -10,17 +10,17 @@
 void printqueue(struct queue *q)
 {
 	struct qentry *current = q->head;
-	printf("[");
+	kprintf("[");
 	while (current->next != NULL) {
 		if (current == q->tail) {
-			printf("(%d)", current->pid);
+			kprintf("(%d)", current->pid);
 		}
 		else {
-			printf("(%d), ", current->pid);
+			kprintf("(%d), ", current->pid);
 			current = current->next;
 		}
 	}
-	printf("]");
+	kprintf("]");
 	// TODO - print all contents from head to tail
 	// TODO - format should be [(pid), (pid), ...]
 }
@@ -114,18 +114,10 @@ pid32 dequeue(struct queue *q)
 	else {
 		struct qentry *head = q->head;
 		q->head = head->next;
-		//free memory
+		kprintf("About to free head in dequeue\n");
+		free(head, sizeof(head));
 		return head->pid;
 	}
-	// TODO - return EMPTY if queue is empty
-
-	// TODO - get the head entry of the queue
-
-	// TODO - unlink the head entry from the rest
-
-	// TODO - free up the space on the heap
-
-	// TODO - return the pid on success
 }
 
 /**
@@ -137,7 +129,7 @@ pid32 dequeue(struct queue *q)
 struct qentry *getbypid(pid32 pid, struct queue *q)
 {
 	// TODO - return NULL if queue is empty or if an illegal pid is given
-	if(isEmpty(q) || isbadpid(pid))
+	if(isempty(q) || isbadpid(pid))
 		return NULL;
 	// TODO - find the qentry with the given pid
 	bool8 found = FALSE;
@@ -164,12 +156,13 @@ struct qentry *getbypid(pid32 pid, struct queue *q)
 pid32 getfirst(struct queue *q)
 {
 	// TODO - return EMPTY if queue is empty
-	if(isEmpty(q))
+	if(isempty(q))
 		return EMPTY;
 	// TODO - remove process from head of queue and return its pid
 	pid32 removed = q->head->pid;
 	struct qentry *next = q->head->next;
-	free(q->head);
+	kprintf("About to free head in getfirst\n");
+	free(q->head, sizeof(q->head));
 	q->head = next;
 	return removed;
 }
@@ -182,12 +175,13 @@ pid32 getfirst(struct queue *q)
 pid32 getlast(struct queue *q)
 {
 	// TODO - return EMPTY if queue is empty
-	if(isEmpty(q))
+	if(isempty(q))
 		return EMPTY;
 	// TODO - remove process from tail of queue and return its pid
 	pid32 removed = q->tail->pid;
 	struct qentry *last = q->tail->prev;
-	free(q->tail);
+	kprintf("About to free tail in getlast\n");
+	free(q->tail, sizeof(q->tail));
 	q->tail = last;
 	return removed;
 }
@@ -201,7 +195,7 @@ pid32 getlast(struct queue *q)
 pid32 remove(pid32 pid, struct queue *q)
 {
 	// TODO - return EMPTY if queue is empty
-	if(isEmpty(q))
+	if(isempty(q))
 		return EMPTY;
 	// TODO - return SYSERR if pid is illegal
 	if(isbadpid(pid))
@@ -210,7 +204,7 @@ pid32 remove(pid32 pid, struct queue *q)
 	struct qentry *removed = getbypid(pid, q);
 	if(removed != NULL)
 	{
-		
+		kprintf("Remove: entering loop that does nothing \n");
 	}
 	else // TODO - if pid does not exist in the queue, return SYSERR
 		return SYSERR;
