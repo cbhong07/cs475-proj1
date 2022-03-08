@@ -32,7 +32,7 @@ void printqueue(struct queue *q)
  */
 bool8 isempty(struct queue *q)
 {
-	if(q->size == EMPTY) {
+	if(q->size == 0) {
 		return TRUE;
 	}
 	else {
@@ -49,10 +49,10 @@ bool8 isempty(struct queue *q)
 bool8 nonempty(struct queue *q)
 {
 	if(q->head != NULL) {
-		return FALSE;
+		return TRUE;
 	}
 	else {
-		return TRUE;
+		return FALSE;
 	}
 	// TODO - don't just check q's size because q could be NULL
 }
@@ -88,8 +88,19 @@ pid32 enqueue(pid32 pid, struct queue *q)
 	}
 	else {
 		struct qentry *new = (struct qentry*) malloc(sizeof(struct qentry)); //POSSIBLE BREAKPOINT
-		*new = (struct qentry) {.pid = pid, .next = NULL, .prev = q->tail}; //ALSO POSSIBLY BROKEN???
+		//*new = (struct qentry) {.pid = pid, .next = NULL, .prev = NULL}; //ALSO POSSIBLY BROKEN???
+		new->pid = pid;
+		new->next = NULL;
+		new->prev = NULL;
+		if(isempty(q)) {
+			q->head = new;
+		}
+		else {
+			new->prev = q->tail;
+			q->tail->next = new;
+		} 
 		q->tail = new;
+		q->size++;
 		return pid;
 	}
 	// TODO - allocate space on heap for a new QEntry
@@ -112,13 +123,20 @@ pid32 dequeue(struct queue *q)
 		return EMPTY;
 	}
 	else {
-		struct qentry *head = q->head->next;
-		kprintf("About to free head in dequeue\n");
-		free(q->head, sizeof(q->head));
-		kprintf("Freeing dequeue head successful\n");
-		q->head = head;
-		kprintf("Dequeue successfully reassigned head\n");
-		return head->pid;
+		// struct qentry *head = q->head->next;
+		// kprintf("About to free head in dequeue\n");
+		// free(q->head, sizeof(q->head));
+		// kprintf("Freeing dequeue head successful\n");
+		// q->head = head;
+		// kprintf("Dequeue successfully reassigned head\n");
+		// return head->pid;
+		struct qentry *head = q->head;
+		q->head = q->head->next;
+		q->head->prev = NULL;
+		pid32 tempPID = head->pid;
+		free(head, sizeof(struct qentry));
+		q->size--;
+		return tempPID;
 	}
 }
 
@@ -161,11 +179,11 @@ pid32 getfirst(struct queue *q)
 	if(isempty(q))
 		return EMPTY;
 	// TODO - remove process from head of queue and return its pid
-	pid32 removed = q->head->pid;
-	struct qentry *next = q->head->next;
-	kprintf("About to free head in getfirst\n");
-	free(q->head, sizeof(q->head));
-	q->head = next;
+	pid32 removed = q->head->pid; //HI IM BROKEN HERE. OVER HERE
+	struct qentry *next = q->head;
+	q->head = q->head->next;
+	q->head->prev = NULL;
+	free(next, sizeof(struct qentry));
 	return removed;
 }
 
@@ -181,10 +199,10 @@ pid32 getlast(struct queue *q)
 		return EMPTY;
 	// TODO - remove process from tail of queue and return its pid
 	pid32 removed = q->tail->pid;
-	struct qentry *last = q->tail->prev;
-	kprintf("About to free tail in getlast\n");
-	free(q->tail, sizeof(q->tail));
-	q->tail = last;
+	struct qentry *last = q->tail;
+	q->tail = q->tail->prev;
+	q->tail->next = NULL;
+	free(last, sizeof(struct qentry));
 	return removed;
 }
 
