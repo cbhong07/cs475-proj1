@@ -184,6 +184,7 @@ pid32 getfirst(struct queue *q)
 	q->head = q->head->next;
 	q->head->prev = NULL;
 	free(next, sizeof(struct qentry));
+	q->size--;
 	return removed;
 }
 
@@ -203,6 +204,7 @@ pid32 getlast(struct queue *q)
 	q->tail = q->tail->prev;
 	q->tail->next = NULL;
 	free(last, sizeof(struct qentry));
+	q->size--;
 	return removed;
 }
 
@@ -221,12 +223,25 @@ pid32 remove(pid32 pid, struct queue *q)
 	if(isbadpid(pid))
 		return SYSERR;
 	// TODO - remove process identified by pid parameter from the queue and return its pid
-	struct qentry *removed = getbypid(pid, q);
-	if(removed != NULL)
+	struct qentry *toBeRemoved = getbypid(pid, q);
+	if(toBeRemoved == NULL)
 	{
-		kprintf("Remove: entering loop that does nothing \n");
+		return SYSERR; //we didn't find it, error out
 	}
-	else // TODO - if pid does not exist in the queue, return SYSERR
-		return SYSERR;
+	else
+	{
+		if(q->head == toBeRemoved) //case 0: removed object is head
+			return getfirst(q);
+		else if (q->tail == toBeRemoved) //case 1: removed object is tail
+			return getlast(q);
+		else { //final case: removed object is normal
+			pid32 remPID = toBeRemoved->pid;
+			toBeRemoved->prev->next =  toBeRemoved->next; //previous entry's next set to next
+			toBeRemoved->next->prev = toBeRemoved->prev; //next entry's previous set to previous
+			q->size--;
+			free(toBeRemoved, sizeof(struct qentry));
+			return remPID;
+		}
+	}
 	
 }
